@@ -29,8 +29,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: TypeScript typecheck
-        run: npx tsc --noEmit
+      - name: Print Node/npm versions
+        run: |
+          echo "node: $(node -v)"
+          echo "npm: $(npm -v)"
+
+      - name: TypeScript typecheck (verbose on failure)
+        run: |
+          # Run typecheck against the repo tsconfig. If it fails, print environment and
+          # a pretty version of the compiler output so the Actions log contains actionable info.
+          npx tsc --noEmit --project tsconfig.json || (
+            echo '--- tsc failed; environment info ---'
+            node -v
+            npm -v
+            echo '--- tsc --pretty output ---'
+            npx tsc --noEmit --project tsconfig.json --pretty
+            exit 1
+          )
 
       - name: Run lint (if defined)
         run: |
