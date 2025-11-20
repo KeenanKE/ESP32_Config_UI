@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import { supabase } from '../supabase'
+import { supabase, isSupabaseConfigured } from '../supabase'
 
 export default function Dashboard(){
   const [devices, setDevices] = useState<any[]>([])
 
   useEffect(()=>{
     async function load(){
-      const { data } = await supabase.from('devices').select('*')
+      if (!isSupabaseConfigured) {
+        console.warn('Supabase not configured; skipping device load')
+        setDevices([])
+        return
+      }
+      const sb = supabase as any
+      const { data } = await sb.from('devices').select('*')
       setDevices(data || [])
     }
     load()

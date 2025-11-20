@@ -1,0 +1,84 @@
+name: CI
+
+# Run CI on push to any branch and on pull requests (standard practice)
+on:
+  push: {}
+  pull_request: {}
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Print Node/npm versions
+        run: |
+          echo "node: $(node -v)"
+          echo "npm: $(npm -v)"
+
+      - name: Show working directory & repo files
+        run: |
+          echo "PWD: $(pwd)"
+          echo '--- top-level files ---'
+          ls -la
+          echo '--- src dir ---'
+          ls -la src || true
+          echo '--- tsconfig check ---'
+          test -f tsconfig.json && echo 'tsconfig.json exists' || echo 'tsconfig.json MISSING'
+
+      - name: TypeScript typecheck (verbose on failure)
+        run: |
+          # Run typecheck against the repo tsconfig. If it fails, print environment and
+          # a pretty version of the compiler output so the Actions log contains actionable info.
+          npx tsc --noEmit --project tsconfig.json || (
+            echo '--- tsc failed; environment info ---'
+            node -v
+            npm -v
+            echo '--- tsc --pretty output ---'
+            npx tsc --noEmit --project tsconfig.json --pretty
+            exit 1
+          )
+
+      - name: Run lint (if defined)
+        run: |
+          if npm run | grep -q "lint"; then
+            npm run lint
+          else
+            echo "No lint script defined, skipping"
+          fi
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests (if defined)
+        run: |
+          if npm run | grep -q "test"; then
+            npm test --if-present
+          else
+            echo "No test script defined, skipping"
+          fi
+
+      - name: Upload build artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist

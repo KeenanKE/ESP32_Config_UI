@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../supabase'
+import { supabase, isSupabaseConfigured } from '../supabase'
 
 export default function LoginPage(){
   const [email, setEmail] = useState('')
@@ -10,7 +10,13 @@ export default function LoginPage(){
 
   async function signIn(){
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (!isSupabaseConfigured) {
+      alert('Supabase not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env')
+      setLoading(false)
+      return
+    }
+    const sb = supabase as any
+    const { error } = await sb.auth.signInWithPassword({ email, password })
     setLoading(false)
     if (error) {
       alert(error.message)
@@ -21,7 +27,13 @@ export default function LoginPage(){
 
   async function signUp(){
     setLoading(true)
-    const { error } = await supabase.auth.signUp({ email, password })
+    if (!isSupabaseConfigured) {
+      alert('Supabase not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env')
+      setLoading(false)
+      return
+    }
+    const sb = supabase as any
+    const { error } = await sb.auth.signUp({ email, password })
     setLoading(false)
     if (error) alert(error.message)
     else alert('Check your email to confirm')

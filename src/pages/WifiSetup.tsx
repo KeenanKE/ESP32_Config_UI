@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../supabase'
+import { supabase, isSupabaseConfigured } from '../supabase'
 
 export default function WifiSetup(){
   const [ssid, setSsid] = useState('')
@@ -8,9 +8,18 @@ export default function WifiSetup(){
   const nav = useNavigate()
 
   async function submit(){
-    // For now store the wifi info in a user_metadata field in Supabase profile (demo only)
-    const user = supabase.auth.getUser()
-    await supabase.from('devices').insert([{ ssid, password, owner: (await user).data?.user?.id }])
+    if (!isSupabaseConfigured) {
+      alert('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env')
+      return
+    }
+
+    // Demo-only provisioning flow: do NOT store Wi-Fi passwords in plaintext for production.
+    // Here we store a short hint and enqueue a provisioning request (status='pending').
+    const hint = password ? `****${password.slice(-4)}` : ''
+  // We checked isSupabaseConfigured above so assert non-null here for TS
+  const sb = supabase as any
+  const user = await sb.auth.getUser()
+  await sb.from('devices').insert([{ ssid, password_hint: hint, status: 'pending', owner: user.data?.user?.id }])
     nav('/dashboard')
   }
 
