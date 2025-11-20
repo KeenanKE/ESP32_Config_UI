@@ -9,3 +9,8 @@ node_modules/
 
 # Vite build
 dist/
+
+# OS / editor
+.DS_Store
+.vscode/
+npm-debug.log*
