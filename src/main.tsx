@@ -5,6 +5,7 @@ import LoginPage from './pages/Login'
 import WifiSetupPage from './pages/WifiSetup'
 import DashboardPage from './pages/Dashboard'
 import './styles.css'
+import ErrorBoundary from './components/ErrorBoundary'
 
 function App(){
   return (
@@ -18,4 +19,20 @@ function App(){
   )
 }
 
-createRoot(document.getElementById('root')!).render(<App />)
+// Simple mount sanity text so we can see whether React starts mounting at all.
+try{
+  const rootEl = document.getElementById('root')
+  if (rootEl) {
+    rootEl.innerHTML = '<div id="__app_debug">[app] mounting...</div>'
+  }
+}catch(e){
+  // ignore
+}
+
+console.log('[app] boot')
+
+createRoot(document.getElementById('root')!).render(
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
+)
