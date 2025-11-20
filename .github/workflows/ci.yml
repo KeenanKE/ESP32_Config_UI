@@ -34,6 +34,16 @@ jobs:
           echo "node: $(node -v)"
           echo "npm: $(npm -v)"
 
+      - name: Show working directory & repo files
+        run: |
+          echo "PWD: $(pwd)"
+          echo '--- top-level files ---'
+          ls -la
+          echo '--- src dir ---'
+          ls -la src || true
+          echo '--- tsconfig check ---'
+          test -f tsconfig.json && echo 'tsconfig.json exists' || echo 'tsconfig.json MISSING'
+
       - name: TypeScript typecheck (verbose on failure)
         run: |
           # Run typecheck against the repo tsconfig. If it fails, print environment and
