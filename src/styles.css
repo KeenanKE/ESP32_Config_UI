@@ -1,0 +1,4 @@
+body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin: 0; padding: 1rem; }
+.page { max-width: 720px; margin: 2rem auto; }
+input { display:block; margin:0.5rem 0; padding: 0.5rem; width:100%; box-sizing:border-box }
+button{ margin-right:0.5rem }
