@@ -1,0 +1,11 @@
+# Local environment files (do not commit)
+.env
+.env.local
+.env.*.local
+.env.*
+
+# Node modules
+node_modules/
+
+# Vite build
+dist/
